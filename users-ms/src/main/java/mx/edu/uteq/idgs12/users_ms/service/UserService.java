@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -105,6 +106,29 @@ public class UserService {
                     refreshTokenService.delete(token);
                     return true;
                 }).orElse(false);
+    }
+
+        public Optional<UserResponseDTO> getUserById(Integer id) {
+        return userRepository.findById(id).map(this::mapToResponse);
+    }
+
+    public Optional<UserResponseDTO> updateUser(Integer id, UserRegisterDTO dto) {
+        return userRepository.findById(id).map(user -> {
+            if (dto.getFirstName() != null) user.setFirstName(dto.getFirstName());
+            if (dto.getLastName() != null) user.setLastName(dto.getLastName());
+            if (dto.getEmail() != null) user.setEmail(dto.getEmail());
+            if (dto.getEnrollmentNumber() != null) user.setEnrollmentNumber(dto.getEnrollmentNumber());
+            if (dto.getProfileImage() != null) user.setProfileImage(dto.getProfileImage());
+            User updated = userRepository.save(user);
+            return mapToResponse(updated);
+        });
+    }
+
+    public List<UserResponseDTO> getUsersByUniversity(Integer idUniversity) {
+    return userRepository.findByIdUniversity(idUniversity).stream()
+            .filter(u -> !u.getStatus().equals(false))
+            .map(this::mapToResponse)
+            .toList();
     }
 
     /** Convertir Entity -> DTO */
